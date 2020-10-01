@@ -5,27 +5,13 @@
         <a-form layout="inline">
           <a-row :gutter="48">
             <a-col :md="8" :sm="24">
-              <a-form-item label="规则编号">
-                <a-input v-model="queryParam.id" placeholder=""/>
-              </a-form-item>
-            </a-col>
-            <a-col :md="8" :sm="24">
-              <a-form-item label="使用状态">
-                <a-select v-model="queryParam.status" placeholder="请选择" default-value="0">
-                  <a-select-option value="0">全部</a-select-option>
-                  <a-select-option value="1">关闭</a-select-option>
-                  <a-select-option value="2">运行中</a-select-option>
-                </a-select>
+              <a-form-item label="">
+                <a-input v-model="queryParam.selectContent" placeholder="请输入昵称/openid/手机号"/>
               </a-form-item>
             </a-col>
             <a-col :md="!advanced && 8 || 24" :sm="24">
               <span class="table-page-search-submitButtons" :style="advanced && { float: 'right', overflow: 'hidden' } || {} ">
-                <a-button type="primary" @click="$refs.table.refresh(true)">查询</a-button>
-                <a-button style="margin-left: 8px" @click="() => this.queryParam = {}">重置</a-button>
-                <a @click="toggleAdvanced" style="margin-left: 8px">
-                  {{ advanced ? '收起' : '展开' }}
-                  <a-icon :type="advanced ? 'up' : 'down'"/>
-                </a>
+                <a-button type="primary" @click="$refs.table.refresh(true)">搜索</a-button>
               </span>
             </a-col>
           </a-row>
@@ -38,15 +24,13 @@
         rowKey="key"
         :columns="columns"
         :data="loadData"
-        :alert="true"
-        :rowSelection="rowSelection"
         showPagination="auto"
       >
         <span slot="serial" slot-scope="text, record, index">
           {{ index + 1 }}
         </span>
-        <span slot="status" slot-scope="text">
-          <a-badge :status="text | statusTypeFilter" :text="text | statusFilter" />
+        <span slot="avatar" slot-scope="text, record">
+          <img :src="record.avatarUrl" alt="头像">
         </span>
         <span slot="description" slot-scope="text">
           <ellipsis :length="4" tooltip>{{ text }}</ellipsis>
@@ -54,24 +38,165 @@
 
         <span slot="action" slot-scope="text, record">
           <template>
-            <a @click="handleEdit(record)">配置</a>
-            <a-divider type="vertical" />
-            <a @click="handleSub(record)">订阅报警</a>
+            <a @click="userDetail(record)">详情</a>
           </template>
         </span>
       </s-table>
     </a-card>
   </page-header-wrapper>
 </template>
-<script>
-export default {
-  data() {
-    return {
 
+<script>
+import moment from 'moment'
+import { STable, Ellipsis } from '@/components'
+import { userList } from '@/api/manage'
+
+const columns = [
+  {
+    title: '序号',
+    dataIndex: 'serialNo'
+  },
+  {
+    title: '头像',
+    dataIndex: 'avatarUrl',
+    scopedSlots: { customRender: 'avatar' }
+  },
+  {
+    title: '昵称',
+    dataIndex: 'nickName'
+  },
+  {
+    title: 'openId',
+    dataIndex: 'openId'
+  },
+  {
+    title: '绑定号码',
+    dataIndex: 'tripNum'
+  },
+  {
+    title: '绑定时间',
+    dataIndex: 'gmtCreate'
+  },
+  {
+    title: '行程发布量',
+    dataIndex: 'updatedAt'
+  },
+  {
+    title: '关注数',
+    dataIndex: 'fensNum'
+  },
+  {
+    title: '操作',
+    dataIndex: 'action',
+    width: '150px',
+    scopedSlots: { customRender: 'action' }
+  }
+]
+
+const statusMap = {
+  0: {
+    status: 'default',
+    text: '关闭'
+  },
+  1: {
+    status: 'processing',
+    text: '运行中'
+  },
+  2: {
+    status: 'success',
+    text: '已上线'
+  },
+  3: {
+    status: 'error',
+    text: '异常'
+  }
+}
+
+export default {
+  name: 'TableList',
+  components: {
+    STable,
+    Ellipsis
+  },
+  data () {
+    this.columns = columns
+    return {
+      // create model
+      visible: false,
+      confirmLoading: false,
+      mdl: null,
+      // 高级搜索 展开/关闭
+      advanced: false,
+      // 查询参数
+      queryParam: {},
+      // 加载数据方法 必须为 Promise 对象
+      loadData: parameter => {
+        const requestParameters = Object.assign({}, parameter, this.queryParam)
+        console.log('loadData request parameters:', requestParameters)
+        return userList(requestParameters)
+          .then(res => {
+            return res.value
+          })
+      },
+      selectedRowKeys: [],
+      selectedRows: []
+    }
+  },
+  filters: {
+    statusFilter (type) {
+      return statusMap[type].text
+    },
+    statusTypeFilter (type) {
+      return statusMap[type].status
+    }
+  },
+  computed: {
+    rowSelection () {
+      return {
+        selectedRowKeys: this.selectedRowKeys,
+        onChange: this.onSelectChange
+      }
     }
   },
   methods: {
-    
+    userDetail () {
+
+    },
+    handleAdd () {
+      this.mdl = null
+      this.visible = true
+    },
+    handleEdit (record) {
+      this.visible = true
+      this.mdl = { ...record }
+    },
+    handleOk () {
+    },
+    handleCancel () {
+      this.visible = false
+
+      const form = this.$refs.createModal.form
+      form.resetFields() // 清理表单数据（可不做）
+    },
+    handleSub (record) {
+      if (record.status !== 0) {
+        this.$message.info(`${record.no} 订阅成功`)
+      } else {
+        this.$message.error(`${record.no} 订阅失败，规则已关闭`)
+      }
+    },
+    onSelectChange (selectedRowKeys, selectedRows) {
+      this.selectedRowKeys = selectedRowKeys
+      this.selectedRows = selectedRows
+    },
+    toggleAdvanced () {
+      this.advanced = !this.advanced
+    },
+    resetSearchForm () {
+      this.queryParam = {
+        date: moment(new Date())
+      }
+    }
   }
 }
 </script>

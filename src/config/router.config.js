@@ -21,15 +21,17 @@ export const asyncRouterMap = [
       //   name: '首页',
       //   component: () => import('@/views/dashboard/Main,')
       // },
-      // {
-      //   path: '/user-manage',
-      //   name: '用户管理',
-      //   component: () => import('@/views/dashboard/UserManage')
-      // },
-      // {
-      //   path: '/article-manage',
-      //   name: '作品管理',
-      //   component: () => import('@/views/dashboard/ArticleManage,'),
+      {
+        path: '/user-manage',
+        name: '用户管理',
+        meta: { title: '用户管理', keepAlive: true, icon: bxAnaalyse },
+        component: () => import('@/views/dashboard/UserManage')
+      },
+      {
+        path: '/article-manage',
+        name: '作品管理',
+        meta: { title: '作品管理', keepAlive: true, icon: bxAnaalyse },
+        component: () => import('@/views/dashboard/ArticleManage')
       //   children: [
       //     {
       //       path: 'routine',
@@ -47,12 +49,13 @@ export const asyncRouterMap = [
       //       component: () => import('@/views/dashboard/TourDetail')
       //     }
       //   ]
-      // },
-      // {
-      //   path: '/account-manage',
-      //   name: '账户管理',
-      //   component: () => import('@/views/dashboard/AccountManage')
-      // },
+      },
+      {
+        path: '/account-manage',
+        name: '账户管理',
+        meta: { title: '账户管理', keepAlive: true, icon: bxAnaalyse },
+        component: () => import('@/views/dashboard/AccountManage')
+      },
       // dashboard
       {
         path: '/dashboard',

@@ -68,3 +68,19 @@ export function saveSub (sub) {
     data: sub
   })
 }
+
+export function userList (params) {
+  return request({
+    url: '/manage/wandering/user/v1/getMiniUsers',
+    method: 'get',
+    params: params
+  })
+}
+
+export function tripList (params) {
+  return request({
+    url: '/manage/wandering/trip/v1/pageTrips',
+    method: 'get',
+    params: params
+  })
+}
