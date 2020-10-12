@@ -1,11 +1,5 @@
 <template>
-  <div>
-    <a-page-header
-      style="border: 1px solid rgb(235, 237, 240)"
-      title="返回上一页"
-      sub-title="游记详情"
-      @back="toBack"
-    />
+  <page-header-wrapper>
     <a-card :bordered="false">
       <div class="table-page-search-wrapper">
         <a-form layout="inline">
@@ -35,11 +29,8 @@
         <span slot="serial" slot-scope="text, record, index">
           {{ index + 1 }}
         </span>
-        <span slot="routinePic" slot-scope="text, record">
-          <template v-for="(pic, picIndex) in record.materialUrls">
-            <img v-if="!isVideo(pic)" :key="picIndex" :src="pic" style="width: 40px; margin-right: 8px; margin-top: 4px;" alt="游记图片">
-            <video v-if="isVideo(pic)" :key="picIndex" :src="pic" controls style="width: 200px; margin-right: 8px; margin-top: 4px;"></video>
-          </template>
+        <span slot="avatar" slot-scope="text, record">
+          <img :src="record.avatarUrl" alt="头像">
         </span>
         <span slot="description" slot-scope="text">
           <ellipsis :length="4" tooltip>{{ text }}</ellipsis>
@@ -47,21 +38,25 @@
 
         <span slot="action" slot-scope="text, record">
           <template>
-            <a @click="tourDetail(record)" style="margin-right: 8px;">行程详情</a>
-            <a @click="deleteRoutine(record)">删除游记</a>
+            <a @click="commentDetail(record)" style="margin-right: 8px;">行程详情</a>
+            <a @click="deleteComment(record)">删除评论</a>
           </template>
         </span>
       </s-table>
     </a-card>
-  </div>
+  </page-header-wrapper>
 </template>
 
 <script>
 import moment from 'moment'
 import { STable, Ellipsis } from '@/components'
-import { listTravel, deleteTravel } from '@/api/manage'
+import { commentList, deleteComment } from '@/api/manage'
 
 const columns = [
+  {
+    title: '序号',
+    dataIndex: 'serialNo'
+  },
   {
     title: '昵称',
     dataIndex: 'nickName'
@@ -75,23 +70,16 @@ const columns = [
     dataIndex: 'tripNum'
   },
   {
-    title: '行程主题',
+    title: '评论行程',
     dataIndex: 'theme'
   },
   {
-    title: '游记内容',
-    dataIndex: 'travelExperience'
+    title: '评论内容',
+    dataIndex: 'content'
   },
   {
-    title: '游记图片',
-    dataIndex: 'routinePic',
-    scopedSlots: {
-      customRender: 'routinePic'
-    }
-  },
-  {
-    title: '游记发布时间',
-    dataIndex: 'travelTime'
+    title: '评论时间',
+    dataIndex: 'commentTime'
   },
   {
     title: '操作',
@@ -137,23 +125,21 @@ export default {
       advanced: false,
       // 查询参数
       queryParam: {
-        currentPage: 1,
-        pageNum: 20,
         tripId: this.tripId,
-        openId: ''
+        pageNum: 20
       },
       // 加载数据方法 必须为 Promise 对象
       loadData: parameter => {
         const requestParameters = Object.assign({}, parameter, this.queryParam)
-        console.log('loadData request parameters:', requestParameters)
-        requestParameters.tripId = this.tripId
         requestParameters.currentPage = parameter.pageNo
-        return listTravel(requestParameters)
+        requestParameters.tripId = this.tripId
+        console.log('loadData request parameters:', requestParameters)
+        return commentList(requestParameters)
           .then(res => {
             if (res && res.success) {
               const data = res.value.data.map((itm, index) => ({
                 ...itm,
-                travelTime: itm.travelTime ? moment(itm.travelTime).format('YYYY-MM-DD HH:mm:ss') : '',
+                commentTime: itm.commentTime ? moment(itm.commentTime).format('YYYY-MM-DD HH:mm:ss') : '',
                 rowKey: index,
                 key: index,
                 serialNo: ((res.value.pageInfo.currentPage - 1) * res.value.pageInfo.pageSize) + index + 1
@@ -200,36 +186,26 @@ export default {
     }
   },
   methods: {
-    isVideo (item) {
-      try {
-        const videoSuff = ['mp4', 'flv', 'wmv', 'asf', 'rmvb', 'mov', '3gp', 'tm', 'asx']
-        // eslint-disable-next-line
-        const suffList = item.split('\.')
-        const suffix = suffList[suffList.length - 1]
-        return videoSuff.indexOf(suffix) > -1
-      } catch (error) {
-        return false
-      }
-    },
     toBack () {
-      this.$router.go(-1)
+      this.$router.replace({
+        path: '/article-manage'
+      })
     },
-    deleteRoutine (item) {
-      deleteTravel(item.travelId).then(ret => {
-        if (ret) {
-          this.$message.success('游记删除成功')
+    deleteComment (item) {
+      deleteComment(item.commentId).then(ret => {
+        if (ret && ret.success) {
+          this.$message.success('评论删除成功')
           this.$refs.table.refresh(true)
         }
       })
     },
-    routineDetail (item) {
-
-    },
     commentDetail (item) {
-
-    },
-    userDetail () {
-
+      this.$router.push({
+        path: '/article/tour',
+        query: {
+          id: item.tripId
+        }
+      })
     },
     handleAdd () {
       this.mdl = null

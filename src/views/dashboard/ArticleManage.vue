@@ -14,6 +14,18 @@
                 <a-button type="primary" @click="$refs.table.refresh(true)">搜索</a-button>
               </span>
             </a-col>
+            <a-col :md="8" :sm="24">
+              <a-select :default-value="1" style="width: 200px; margin-right: 8px;" @change="handleChange" v-model="seqType">
+                <a-select-option :value="1">
+                  发布时间排序
+                </a-select-option>
+                <a-select-option :value="2">
+                  点赞数排序
+                </a-select-option>
+              </a-select>
+              <a-icon @click="sequnceDesc" v-show="this.sequence == 1" type="sort-ascending" />
+              <a-icon @click="sequnceAsc" v-show="this.sequence != 1" type="sort-descending" />
+            </a-col>
           </a-row>
         </a-form>
       </div>
@@ -30,7 +42,7 @@
           {{ index + 1 }}
         </span>
         <span slot="avatar" slot-scope="text, record">
-          <img :src="record.avatarUrl" alt="头像">
+          <img :src="record.avatarUrl" style="width: 30px" alt="头像">
         </span>
         <span slot="description" slot-scope="text">
           <ellipsis :length="4" tooltip>{{ text }}</ellipsis>
@@ -38,7 +50,36 @@
 
         <span slot="action" slot-scope="text, record">
           <template>
-            <a @click="userDetail(record)">详情</a>
+            <a-tooltip>
+              <template slot="title">
+                查看行程
+              </template>
+              <a @click="tourDetail(record)" style="margin-right: 8px"><a-icon type="calendar" /></a>
+            </a-tooltip>
+            <a-tooltip>
+              <template slot="title">
+                游记详情
+              </template>
+              <a @click="routineDetail(record)" style="margin-right: 8px"><a-icon type="edit" /></a>
+            </a-tooltip>
+            <a-tooltip>
+              <template slot="title">
+                评论详情
+              </template>
+              <a @click="commentDetail(record)" style="margin-right: 8px"><a-icon type="message" /></a>
+            </a-tooltip>
+            <a-tooltip>
+              <template slot="title">
+                推荐
+              </template>
+              <a @click="recommend(record)" style="margin-right: 8px">推</a>
+            </a-tooltip>
+            <a-tooltip>
+              <template slot="title">
+                置顶
+              </template>
+              <a @click="getToTop(record)" style="margin-right: 8px">顶</a>
+            </a-tooltip>
           </template>
         </span>
       </s-table>
@@ -49,7 +90,7 @@
 <script>
 import moment from 'moment'
 import { STable, Ellipsis } from '@/components'
-import { tripList } from '@/api/manage'
+import { tripList, operateTrip } from '@/api/manage'
 
 const columns = [
   {
@@ -78,12 +119,24 @@ const columns = [
     dataIndex: 'gmtCreate'
   },
   {
-    title: '行程发布量',
-    dataIndex: 'updatedAt'
+    title: '行程标题',
+    dataIndex: 'theme'
+  },
+  {
+    title: '点赞数',
+    dataIndex: 'praiseNum'
   },
   {
     title: '关注数',
     dataIndex: 'fensNum'
+  },
+  {
+    title: '评论数',
+    dataIndex: 'commentNum'
+  },
+  {
+    title: '收藏数',
+    dataIndex: 'collectNum'
   },
   {
     title: '操作',
@@ -127,15 +180,43 @@ export default {
       mdl: null,
       // 高级搜索 展开/关闭
       advanced: false,
+      seqType: 1,
+      sequence: 1,
       // 查询参数
       queryParam: {},
       // 加载数据方法 必须为 Promise 对象
       loadData: parameter => {
         const requestParameters = Object.assign({}, parameter, this.queryParam)
+        requestParameters.currentPage = parameter.pageNo
+        requestParameters.pageNum = parameter.pageSize
+        requestParameters.seqType = this.seqType
+        requestParameters.sequence = this.sequence
         console.log('loadData request parameters:', requestParameters)
         return tripList(requestParameters)
           .then(res => {
-            return res.value
+            if (res && res.success) {
+              const data = res.value.data.map((itm, index) => ({
+                ...itm,
+                key: index,
+                rowKey: index,
+                serialNo: ((res.value.pageInfo.currentPage - 1) * res.value.pageInfo.pageSize) + index + 1
+              }))
+              return {
+                data: data,
+                pageSize: 20,
+                pageNo: res.value.pageInfo.currentPage,
+                totalPage: res.value.pageInfo.totalPage,
+                totalCount: res.value.pageInfo.totalCount
+              }
+            } else {
+              return {
+                data: [],
+                pageSize: 20,
+                pageNo: 1,
+                totalPage: 0,
+                totalCount: 0
+              }
+            }
           })
       },
       selectedRowKeys: [],
@@ -159,6 +240,63 @@ export default {
     }
   },
   methods: {
+    sequnceDesc () {
+      this.sequence = 2
+      this.$refs.table.refresh(true)
+    },
+    sequnceAsc () {
+      this.sequence = 1
+      this.$refs.table.refresh(true)
+    },
+    handleChange () {
+      this.$refs.table.refresh(true)
+    },
+    getToTop (item) {
+      operateTrip({
+        topEnd: 0,
+        topStart: 0,
+        tripId: item.tripId,
+        type: 1
+      }).then(ret => {
+        console.log(ret)
+        this.$message.success('文章置顶成功')
+      })
+    },
+    recommend (item) {
+      operateTrip({
+        topEnd: 0,
+        topStart: 0,
+        tripId: item.tripId,
+        type: 0
+      }).then(ret => {
+        console.log(ret)
+        this.$message.success('文章推荐成功')
+      })
+    },
+    tourDetail (item) {
+      this.$router.push({
+        path: '/article/tour',
+        query: {
+          id: item.tripId
+        }
+      })
+    },
+    routineDetail (item) {
+      this.$router.push({
+        path: '/article/routine',
+        query: {
+          id: item.tripId
+        }
+      })
+    },
+    commentDetail (item) {
+      this.$router.push({
+        path: '/article/comment',
+        query: {
+          id: item.tripId
+        }
+      })
+    },
     userDetail () {
 
     },

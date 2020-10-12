@@ -1,4 +1,5 @@
 import request from '@/utils/request'
+import qs from 'querystring'
 
 const api = {
   user: '/user',
@@ -71,7 +72,7 @@ export function saveSub (sub) {
 
 export function userList (params) {
   return request({
-    url: '/manage/wandering/user/v1/getMiniUsers',
+    url: '/wandering/user/v1/getMiniUsers',
     method: 'get',
     params: params
   })
@@ -79,8 +80,192 @@ export function userList (params) {
 
 export function tripList (params) {
   return request({
-    url: '/manage/wandering/trip/v1/pageTrips',
+    url: '/wandering/trip/v1/pageTrips',
     method: 'get',
     params: params
+  })
+}
+
+export function userDetail (params) {
+  return request({
+    url: '/wandering/user/v1/getMiniUserDetail',
+    method: 'get',
+    params: params
+  })
+}
+
+export function operateUser (params) {
+  return request({
+    url: '/wandering/user/v1/operateMiniUser',
+    method: 'delete',
+    params: params
+  })
+}
+
+export function operateTrip (params) {
+  return request({
+    url: '/wandering/trip/v1/operateTrip',
+    method: 'post',
+    data: qs.stringify(params)
+  })
+}
+
+export function deleteTrips (params) {
+  return request({
+    url: '/wandering/trip/v1/deleteTrips',
+    method: 'delete',
+    params: params
+  })
+}
+
+export function tripDetail (id) {
+  return request({
+    url: `/wandering/trip/v1/trips/${id}`,
+    method: 'get'
+  })
+}
+
+export function commentList (params) {
+  return request({
+    url: `/wandering/comment/v1/pageComments`,
+    method: 'get',
+    params: params
+  })
+}
+
+export function deleteComment (id) {
+  return request({
+    url: `/wandering/comment/v1/commentInfo/${id}`,
+    method: 'delete'
+  })
+}
+
+export function deleteTravel (id) {
+  return request({
+    url: `/wandering/travel/v1/travelNotes/${id}`,
+    method: 'delete'
+  })
+}
+
+export function listTravel (params) {
+  return request({
+    url: `/wandering/travel/v1/pageTravels`,
+    method: 'get',
+    params: params
+  })
+}
+
+export function listTheme (params) {
+  return request({
+    url: `/wandering/travel/v1/pageThemes`,
+    method: 'get',
+    params: params
+  })
+}
+
+export function coreIndicators () {
+  return request({
+    url: `/wandering/home/v1/coreIndicators`,
+    method: 'get'
+  })
+}
+
+export function coreIndicatorsChart (params) {
+  return request({
+    url: `/wandering/home/v1/coreIndicatorsChart`,
+    method: 'get',
+    params: params
+  })
+}
+
+export function listShieldWords (params) {
+  return request({
+    url: `/wandering/shield/v1/pageShieldWords`,
+    method: 'get',
+    params: params
+  })
+}
+
+export function deleteShieldWords (id) {
+  return request({
+    url: `/wandering/shield/v1/relShieldWords/${id}`,
+    method: 'delete'
+  })
+}
+
+export function addShieldWords (params) {
+  return request({
+    url: `/wandering/shield/v1/addShieldWords`,
+    method: 'post',
+    data: qs.stringify(params)
+  })
+}
+
+export function updateShieldWords (params) {
+  return request({
+    url: `/wandering/shield/v1/modifyShieldWords`,
+    method: 'post',
+    data: qs.stringify(params)
+  })
+}
+export function listDustComments (params) {
+  return request({
+    url: `/wandering/dustbin/v1/pageDustbinComments`,
+    method: 'get',
+    params: params
+  })
+}
+export function listDustTravels (params) {
+  return request({
+    url: `/wandering/dustbin/v1/pageDustbinTravels`,
+    method: 'get',
+    params: params
+  })
+}
+export function listDustTrips (params) {
+  return request({
+    url: `/wandering/dustbin/v1/pageDustbinTrips`,
+    method: 'get',
+    params: params
+  })
+}
+
+export function listExamineStatus (params) {
+  return request({
+    url: `/wandering/examine/v1/getExamineStatus`,
+    method: 'get',
+    params: params
+  })
+}
+
+export function listExamineComments (params) {
+  return request({
+    url: `/wandering/examine/v1/pageExamineComments`,
+    method: 'get',
+    params: params
+  })
+}
+
+export function listExamineTravels (params) {
+  return request({
+    url: `/wandering/examine/v1/pageExamineTravels`,
+    method: 'get',
+    params: params
+  })
+}
+
+export function listExamineTrips (params) {
+  return request({
+    url: `/wandering/examine/v1/pageExamineTrips`,
+    method: 'get',
+    params: params
+  })
+}
+
+export function updateExamineStatus (params) {
+  return request({
+    url: `/wandering/examine/v1/updateExamineStatus`,
+    method: 'post',
+    data: qs.stringify(params)
   })
 }

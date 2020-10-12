@@ -1,11 +1,5 @@
 <template>
-  <div>
-    <a-page-header
-      style="border: 1px solid rgb(235, 237, 240)"
-      title="返回上一页"
-      sub-title="游记详情"
-      @back="toBack"
-    />
+  <page-header-wrapper>
     <a-card :bordered="false">
       <div class="table-page-search-wrapper">
         <a-form layout="inline">
@@ -53,7 +47,7 @@
         </span>
       </s-table>
     </a-card>
-  </div>
+  </page-header-wrapper>
 </template>
 
 <script>
@@ -212,7 +206,9 @@ export default {
       }
     },
     toBack () {
-      this.$router.go(-1)
+      this.$router.replace({
+        path: '/article-manage'
+      })
     },
     deleteRoutine (item) {
       deleteTravel(item.travelId).then(ret => {
@@ -222,14 +218,13 @@ export default {
         }
       })
     },
-    routineDetail (item) {
-
-    },
-    commentDetail (item) {
-
-    },
-    userDetail () {
-
+    tourDetail (item) {
+      this.$router.push({
+        path: '/article/tour',
+        query: {
+          id: item.tripId
+        }
+      })
     },
     handleAdd () {
       this.mdl = null

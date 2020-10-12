@@ -1,7 +1,7 @@
 import request from '@/utils/request'
-
+import qs from 'querystring'
 const userApi = {
-  Login: '/auth/login',
+  Login: '/wandering/login',
   Logout: '/auth/logout',
   ForgePassword: '/auth/forge-password',
   Register: '/auth/register',
@@ -28,7 +28,7 @@ export function login (parameter) {
   return request({
     url: userApi.Login,
     method: 'post',
-    data: parameter
+    data: qs.stringify(parameter)
   })
 }
 

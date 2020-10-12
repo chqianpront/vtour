@@ -1,18 +1,12 @@
 <template>
-  <div>
-    <a-page-header
-      style="border: 1px solid rgb(235, 237, 240)"
-      title="返回上一页"
-      sub-title="游记详情"
-      @back="toBack"
-    />
+  <page-header-wrapper>
     <a-card :bordered="false">
       <div class="table-page-search-wrapper">
         <a-form layout="inline">
           <a-row :gutter="48">
             <a-col :md="8" :sm="24">
               <a-form-item label="">
-                <a-input v-model="queryParam.selectContent" placeholder="请输入昵称/openid/手机号"/>
+                <a-input v-model="queryParam.searchContent" placeholder="请输入搜索的屏蔽词"/>
               </a-form-item>
             </a-col>
             <a-col :md="!advanced && 8 || 24" :sm="24">
@@ -23,7 +17,9 @@
           </a-row>
         </a-form>
       </div>
-
+      <div style="margin-bottom: 20px;">
+        <a-button type="primary" @click="addWords">新增屏蔽词</a-button>
+      </div>
       <s-table
         ref="table"
         size="default"
@@ -35,11 +31,8 @@
         <span slot="serial" slot-scope="text, record, index">
           {{ index + 1 }}
         </span>
-        <span slot="routinePic" slot-scope="text, record">
-          <template v-for="(pic, picIndex) in record.materialUrls">
-            <img v-if="!isVideo(pic)" :key="picIndex" :src="pic" style="width: 40px; margin-right: 8px; margin-top: 4px;" alt="游记图片">
-            <video v-if="isVideo(pic)" :key="picIndex" :src="pic" controls style="width: 200px; margin-right: 8px; margin-top: 4px;"></video>
-          </template>
+        <span slot="avatar" slot-scope="text, record">
+          <img :src="record.avatarUrl" alt="头像">
         </span>
         <span slot="description" slot-scope="text">
           <ellipsis :length="4" tooltip>{{ text }}</ellipsis>
@@ -47,51 +40,48 @@
 
         <span slot="action" slot-scope="text, record">
           <template>
-            <a @click="tourDetail(record)" style="margin-right: 8px;">行程详情</a>
-            <a @click="deleteRoutine(record)">删除游记</a>
+            <a-tooltip>
+              <template slot="title">
+                更改屏蔽词
+              </template>
+              <a @click="modify(record)" style="margin-right: 8px"><a-icon type="edit" /></a>
+            </a-tooltip>
+            <a-tooltip>
+              <template slot="title">
+                删除屏蔽词
+              </template>
+              <a @click="del(record)" style="margin-right: 8px"><a-icon type="delete" /></a>
+            </a-tooltip>
           </template>
         </span>
       </s-table>
     </a-card>
-  </div>
+    <a-modal v-model="visible" title="修改屏蔽词" ok-text="修改" cancel-text="取消" @ok="handleOk">
+      <a-input placeholder="请输入修改的屏蔽词" v-model="toModifyWord"></a-input>
+    </a-modal>
+    <a-modal v-model="addNewVisible" title="新增屏蔽词" ok-text="新增" cancel-text="取消" @ok="handleAdd">
+      <a-input placeholder="请输入新增的屏蔽词" v-model="toAddWord"></a-input>
+    </a-modal>
+  </page-header-wrapper>
 </template>
 
 <script>
 import moment from 'moment'
 import { STable, Ellipsis } from '@/components'
-import { listTravel, deleteTravel } from '@/api/manage'
+import { listShieldWords, deleteShieldWords, addShieldWords, updateShieldWords } from '@/api/manage'
 
 const columns = [
   {
-    title: '昵称',
-    dataIndex: 'nickName'
+    title: '序号',
+    dataIndex: 'serialNo'
   },
   {
-    title: 'openId',
-    dataIndex: 'openId'
+    title: '屏蔽词',
+    dataIndex: 'shieldWords'
   },
   {
-    title: '手机号',
-    dataIndex: 'tripNum'
-  },
-  {
-    title: '行程主题',
-    dataIndex: 'theme'
-  },
-  {
-    title: '游记内容',
-    dataIndex: 'travelExperience'
-  },
-  {
-    title: '游记图片',
-    dataIndex: 'routinePic',
-    scopedSlots: {
-      customRender: 'routinePic'
-    }
-  },
-  {
-    title: '游记发布时间',
-    dataIndex: 'travelTime'
+    title: '更新时间',
+    dataIndex: 'updateTime'
   },
   {
     title: '操作',
@@ -131,29 +121,29 @@ export default {
     return {
       // create model
       visible: false,
+      addNewVisible: false,
       confirmLoading: false,
+      toModifyWord: '',
+      toAddWord: '',
+      toModifyWordItem: null,
       mdl: null,
       // 高级搜索 展开/关闭
       advanced: false,
       // 查询参数
-      queryParam: {
-        currentPage: 1,
-        pageNum: 20,
-        tripId: this.tripId,
-        openId: ''
-      },
+      queryParam: {},
       // 加载数据方法 必须为 Promise 对象
       loadData: parameter => {
         const requestParameters = Object.assign({}, parameter, this.queryParam)
-        console.log('loadData request parameters:', requestParameters)
-        requestParameters.tripId = this.tripId
         requestParameters.currentPage = parameter.pageNo
-        return listTravel(requestParameters)
+        requestParameters.pageNum = parameter.pageSize
+        requestParameters.searchContent = this.queryParam.searchContent ? this.queryParam.searchContent : ''
+        console.log('loadData request parameters:', requestParameters, this.queryParam)
+        return listShieldWords(requestParameters)
           .then(res => {
             if (res && res.success) {
               const data = res.value.data.map((itm, index) => ({
                 ...itm,
-                travelTime: itm.travelTime ? moment(itm.travelTime).format('YYYY-MM-DD HH:mm:ss') : '',
+                updateTime: itm.gmtUpdate ? moment(itm.gmtUpdate).format('YYYY-MM-DD HH:mm:ss') : '',
                 rowKey: index,
                 key: index,
                 serialNo: ((res.value.pageInfo.currentPage - 1) * res.value.pageInfo.pageSize) + index + 1
@@ -180,9 +170,6 @@ export default {
       selectedRows: []
     }
   },
-  created () {
-    this.tripId = this.$route.query.id
-  },
   filters: {
     statusFilter (type) {
       return statusMap[type].text
@@ -200,46 +187,76 @@ export default {
     }
   },
   methods: {
-    isVideo (item) {
-      try {
-        const videoSuff = ['mp4', 'flv', 'wmv', 'asf', 'rmvb', 'mov', '3gp', 'tm', 'asx']
-        // eslint-disable-next-line
-        const suffList = item.split('\.')
-        const suffix = suffList[suffList.length - 1]
-        return videoSuff.indexOf(suffix) > -1
-      } catch (error) {
-        return false
+    addWords () {
+      this.addNewVisible = true
+    },
+    handleAdd () {
+      if (this.toAddWord) {
+        this.addNewVisible = false
+        addShieldWords({
+          shieldWords: this.toAddWord
+        }).then(ret => {
+          if (ret && ret.success) {
+            this.$message.success('屏蔽词添加成功')
+            this.$refs.table.refresh(true)
+          }
+        })
       }
     },
-    toBack () {
-      this.$router.go(-1)
-    },
-    deleteRoutine (item) {
-      deleteTravel(item.travelId).then(ret => {
-        if (ret) {
-          this.$message.success('游记删除成功')
+    handleOk () {
+      this.visible = false
+      updateShieldWords({
+        shieldId: this.toModifyWordItem.shieldId,
+        shieldWords: this.toModifyWord
+      }).then(ret => {
+        if (ret && ret.success) {
+          this.$message.success('屏蔽词修改成功')
           this.$refs.table.refresh(true)
         }
       })
     },
+    modify (item) {
+      this.visible = true
+      this.toModifyWordItem = item
+    },
+    del (item) {
+      deleteShieldWords(item.shieldId).then(ret => {
+        if (ret && ret.success) {
+          this.$message.success('屏蔽词删除成功')
+          this.$refs.table.refresh(true)
+        }
+      })
+    },
+    tourDetail (item) {
+      this.$router.push({
+        path: '/article/tour',
+        query: {
+          id: item.tripId
+        }
+      })
+    },
     routineDetail (item) {
-
+      this.$router.push({
+        path: '/article/routine',
+        query: {
+          id: item.tripId
+        }
+      })
     },
     commentDetail (item) {
-
+      this.$router.push({
+        path: '/article/comment',
+        query: {
+          id: item.tripId
+        }
+      })
     },
     userDetail () {
 
     },
-    handleAdd () {
-      this.mdl = null
-      this.visible = true
-    },
     handleEdit (record) {
       this.visible = true
       this.mdl = { ...record }
-    },
-    handleOk () {
     },
     handleCancel () {
       this.visible = false
