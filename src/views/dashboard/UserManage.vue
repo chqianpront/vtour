@@ -47,10 +47,19 @@
         <span slot="description" slot-scope="text">
           <ellipsis :length="4" tooltip>{{ text }}</ellipsis>
         </span>
-
+        <span slot="openId" slot-scope="text">
+          <a-tooltip trigger="click">
+            <template slot="title">
+              {{text}}
+            </template>
+            <span style="cursor: pointer;">******</span>
+          </a-tooltip>
+        </span>
         <span slot="action" slot-scope="text, record">
           <template>
-            <a @click="userDetail(record)">详情</a>
+            <a @click="userDetail(record)" style="margin-right: 8px;">详情</a>
+            <a @click="userDetail(record)" style="margin-right: 8px;">禁止发布行程、游记</a>
+            <a @click="userDetail(record)">禁止评论</a>
           </template>
         </span>
       </s-table>
@@ -187,7 +196,8 @@ const columns = [
   },
   {
     title: 'openId',
-    dataIndex: 'openId'
+    dataIndex: 'openId',
+    scopedSlots: { customRender: 'openId' }
   },
   {
     title: '绑定号码',
@@ -208,7 +218,7 @@ const columns = [
   {
     title: '操作',
     dataIndex: 'action',
-    width: '150px',
+    width: '300px',
     scopedSlots: { customRender: 'action' }
   }
 ]

@@ -13,7 +13,7 @@
       广告代码 真实项目中请移除
       production remove this Ads
     -->
-    <ads v-if="isProPreviewSite && !collapsed"/>
+    <!-- <ads v-if="isProPreviewSite && !collapsed"/> -->
     <!-- Ads end -->
 
     <!-- 1.0.0+ 版本 pro-layout 提供 API，
@@ -21,17 +21,13 @@
     -->
     <template v-slot:menuHeaderRender>
       <div>
-        <logo-svg />
-        <h1>{{ title }}</h1>
+        <h1>爱云游运营平台</h1>
       </div>
     </template>
 
-    <setting-drawer :settings="settings" @change="handleSettingChange" />
+    <!-- <setting-drawer :settings="settings" @change="handleSettingChange" /> -->
     <template v-slot:rightContentRender>
       <right-content :top-menu="settings.layout === 'topmenu'" :is-mobile="isMobile" :theme="settings.theme" />
-    </template>
-    <template v-slot:footerRender>
-      <global-footer />
     </template>
     <router-view />
   </pro-layout>
@@ -45,7 +41,6 @@ import { CONTENT_WIDTH_TYPE, SIDEBAR_TYPE, TOGGLE_MOBILE_TYPE } from '@/store/mu
 
 import defaultSettings from '@/config/defaultSettings'
 import RightContent from '@/components/GlobalHeader/RightContent'
-import GlobalFooter from '@/components/GlobalFooter'
 import Ads from '@/components/Other/CarbonAds'
 import LogoSvg from '../assets/logo.svg?inline'
 
@@ -54,7 +49,6 @@ export default {
   components: {
     SettingDrawer,
     RightContent,
-    GlobalFooter,
     LogoSvg,
     Ads
   },

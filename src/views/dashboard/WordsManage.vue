@@ -211,7 +211,7 @@ export default {
       }).then(ret => {
         if (ret && ret.success) {
           this.$message.success('屏蔽词修改成功')
-          this.$refs.table.refresh(true)
+          this.$refs.table.refresh()
         }
       })
     },

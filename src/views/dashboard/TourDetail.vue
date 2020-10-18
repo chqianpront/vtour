@@ -22,7 +22,12 @@
         </p>
         <p>
           <span>openId：</span>
-          <span>{{ tripDetail.openId }}</span>
+          <a-tooltip trigger="click">
+            <template slot="title">
+              {{tripDetail.openId}}
+            </template>
+            <span style="cursor: pointer;">******</span>
+          </a-tooltip>
         </p>
       </a-card>
       <a-card style="width: 100%; margin-bottom: 20px;">
@@ -57,6 +62,7 @@
 }
 </style>
 <script>
+import moment from 'moment'
 import { tripDetail, deleteTrips } from '@/api/manage'
 export default {
   data () {
@@ -72,6 +78,7 @@ export default {
     tripDetail(this.id).then(ret => {
       if (ret) {
         this.tripDetail = ret.value
+        this.tripDetail.tripCreate = ret.value.tripCreate ? moment(ret.value.tripCreate).format('YYYY-MM-DD HH:mm:ss') : ''
       }
     })
   },

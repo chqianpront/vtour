@@ -186,6 +186,13 @@ export function listShieldWords (params) {
   })
 }
 
+export function listAllShieldWords () {
+  return request({
+    url: `/wandering/shield/v1/allShieldWords`,
+    method: 'get'
+  })
+}
+
 export function deleteShieldWords (id) {
   return request({
     url: `/wandering/shield/v1/relShieldWords/${id}`,
@@ -230,7 +237,7 @@ export function listDustTrips (params) {
   })
 }
 
-export function listExamineStatus (params) {
+export function getExamineStatus (params) {
   return request({
     url: `/wandering/examine/v1/getExamineStatus`,
     method: 'get',
@@ -265,6 +272,14 @@ export function listExamineTrips (params) {
 export function updateExamineStatus (params) {
   return request({
     url: `/wandering/examine/v1/updateExamineStatus`,
+    method: 'post',
+    data: qs.stringify(params)
+  })
+}
+
+export function examineChange (params) {
+  return request({
+    url: `/wandering/examine/v1/examineChange`,
     method: 'post',
     data: qs.stringify(params)
   })

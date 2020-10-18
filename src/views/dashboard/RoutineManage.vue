@@ -31,14 +31,21 @@
         </span>
         <span slot="routinePic" slot-scope="text, record">
           <template v-for="(pic, picIndex) in record.materialUrls">
-            <img v-if="!isVideo(pic)" :key="picIndex" :src="pic" style="width: 40px; margin-right: 8px; margin-top: 4px;" alt="游记图片">
+            <img v-if="!isVideo(pic)" :key="picIndex" :src="pic" @click="popImg(pic)" style="width: 40px; margin-right: 8px; margin-top: 4px; cursor: pointer">
             <video v-if="isVideo(pic)" :key="picIndex" :src="pic" controls style="width: 200px; margin-right: 8px; margin-top: 4px;"></video>
           </template>
         </span>
         <span slot="description" slot-scope="text">
           <ellipsis :length="4" tooltip>{{ text }}</ellipsis>
         </span>
-
+        <span slot="openId" slot-scope="text">
+          <a-tooltip trigger="click">
+            <template slot="title">
+              {{text}}
+            </template>
+            <span style="cursor: pointer;">******</span>
+          </a-tooltip>
+        </span>
         <span slot="action" slot-scope="text, record">
           <template>
             <a @click="tourDetail(record)" style="margin-right: 8px;">行程详情</a>
@@ -47,6 +54,12 @@
         </span>
       </s-table>
     </a-card>
+
+    <a-modal v-model="imgVisible" title="行程图片" cancel-text="取消" ok-text="确认" width="900px">
+      <div>
+        <img style="display: block; margin: 0 auto; max-width: 800px;" :src="popImgSrc" alt="行程图片">
+      </div>
+    </a-modal>
   </page-header-wrapper>
 </template>
 
@@ -62,7 +75,8 @@ const columns = [
   },
   {
     title: 'openId',
-    dataIndex: 'openId'
+    dataIndex: 'openId',
+    scopedSlots: { customRender: 'openId' }
   },
   {
     title: '手机号',
@@ -74,7 +88,8 @@ const columns = [
   },
   {
     title: '游记内容',
-    dataIndex: 'travelExperience'
+    dataIndex: 'travelExperience',
+    width: '300px'
   },
   {
     title: '游记图片',
@@ -90,7 +105,7 @@ const columns = [
   {
     title: '操作',
     dataIndex: 'action',
-    width: '150px',
+    width: '180px',
     scopedSlots: { customRender: 'action' }
   }
 ]
@@ -123,6 +138,8 @@ export default {
   data () {
     this.columns = columns
     return {
+      popImgSrc: null,
+      imgVisible: false,
       // create model
       visible: false,
       confirmLoading: false,
@@ -194,6 +211,10 @@ export default {
     }
   },
   methods: {
+    popImg (src) {
+      this.popImgSrc = src
+      this.imgVisible = true
+    },
     isVideo (item) {
       try {
         const videoSuff = ['mp4', 'flv', 'wmv', 'asf', 'rmvb', 'mov', '3gp', 'tm', 'asx']

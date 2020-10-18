@@ -67,7 +67,8 @@ const columns = [
   },
   {
     title: 'openId',
-    dataIndex: 'openId'
+    dataIndex: 'openId',
+    scopedSlots: { customRender: 'openId' }
   },
   {
     title: '绑定号码',

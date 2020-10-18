@@ -22,6 +22,18 @@
                 <a-select-option :value="2">
                   点赞数排序
                 </a-select-option>
+                <a-select-option :value="3">
+                  发布量排序
+                </a-select-option>
+                <a-select-option :value="4">
+                  评论数排序
+                </a-select-option>
+                <a-select-option :value="4">
+                  收藏数排序
+                </a-select-option>
+                <a-select-option :value="4">
+                  关注数排序
+                </a-select-option>
               </a-select>
               <a-icon @click="sequnceDesc" v-show="this.sequence == 1" type="sort-ascending" />
               <a-icon @click="sequnceAsc" v-show="this.sequence != 1" type="sort-descending" />
@@ -46,6 +58,14 @@
         </span>
         <span slot="description" slot-scope="text">
           <ellipsis :length="4" tooltip>{{ text }}</ellipsis>
+        </span>
+        <span slot="openId" slot-scope="text">
+          <a-tooltip trigger="click">
+            <template slot="title">
+              {{text}}
+            </template>
+            <span style="cursor: pointer;">******</span>
+          </a-tooltip>
         </span>
 
         <span slot="action" slot-scope="text, record">
@@ -80,6 +100,12 @@
               </template>
               <a @click="getToTop(record)" style="margin-right: 8px">顶</a>
             </a-tooltip>
+            <a-tooltip>
+              <template slot="title">
+                删除行程
+              </template>
+              <a @click="getToTop(record)" style="margin-right: 8px; color: red">删</a>
+            </a-tooltip>
           </template>
         </span>
       </s-table>
@@ -98,6 +124,11 @@ const columns = [
     dataIndex: 'serialNo'
   },
   {
+    title: '行程标题',
+    dataIndex: 'theme',
+    width: '300px'
+  },
+  {
     title: '头像',
     dataIndex: 'avatarUrl',
     scopedSlots: { customRender: 'avatar' }
@@ -108,27 +139,12 @@ const columns = [
   },
   {
     title: 'openId',
-    dataIndex: 'openId'
-  },
-  {
-    title: '绑定号码',
-    dataIndex: 'tripNum'
-  },
-  {
-    title: '绑定时间',
-    dataIndex: 'gmtCreate'
-  },
-  {
-    title: '行程标题',
-    dataIndex: 'theme'
+    dataIndex: 'openId',
+    scopedSlots: { customRender: 'openId' }
   },
   {
     title: '点赞数',
     dataIndex: 'praiseNum'
-  },
-  {
-    title: '关注数',
-    dataIndex: 'fensNum'
   },
   {
     title: '评论数',
@@ -139,9 +155,17 @@ const columns = [
     dataIndex: 'collectNum'
   },
   {
+    title: '是否公开',
+    dataIndex: 'isOpen'
+  },
+  {
+    title: '行程创建时间',
+    dataIndex: 'tripCreateTime'
+  },
+  {
     title: '操作',
     dataIndex: 'action',
-    width: '150px',
+    width: '180px',
     scopedSlots: { customRender: 'action' }
   }
 ]
@@ -197,6 +221,8 @@ export default {
             if (res && res.success) {
               const data = res.value.data.map((itm, index) => ({
                 ...itm,
+                isOpen: itm.isOpen ? '公开' : '不公开',
+                tripCreateTime: itm.tripCreateTime ? moment(itm.tripCreateTime).format('YYYY-MM-DD HH:mm:ss') : '',
                 key: index,
                 rowKey: index,
                 serialNo: ((res.value.pageInfo.currentPage - 1) * res.value.pageInfo.pageSize) + index + 1

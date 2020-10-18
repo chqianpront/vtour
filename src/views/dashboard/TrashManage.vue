@@ -163,7 +163,8 @@ const commentColumns = [
   },
   {
     title: '评论内容',
-    dataIndex: 'content'
+    dataIndex: 'content',
+    width: '300px'
   },
   {
     title: '删除原因',
@@ -227,6 +228,10 @@ const routineColumns = [
   {
     title: '行程主题',
     dataIndex: 'theme'
+  },
+  {
+    title: '删除原因',
+    dataIndex: 'deleteMsg'
   }
 ]
 
