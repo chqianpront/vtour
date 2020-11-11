@@ -239,7 +239,7 @@ export default {
         requestParameters.currentPage = parameter.pageNo
         requestParameters.pageNum = parameter.pageSize
         requestParameters.seqType = this.getSeqType(parameter.sortField)
-        requestParameters.sequnce = this.getSequnce(parameter.sortOrder)
+        requestParameters.sequence = this.getSequnce(parameter.sortOrder)
         console.log('loadData request parameters:', requestParameters)
         return tripList(requestParameters)
           .then(res => {
@@ -346,10 +346,19 @@ export default {
       this.selectDateVisible = true
     },
     recommend (item) {
-      this.aItem = Object.assign({}, item, {
+      const param = {
+        topEnd: null,
+        topStart: null,
+        tripId: item.tripId,
         type: 1
+      }
+      operateTrip(param).then(ret => {
+        if (ret && ret.success) {
+          this.$message.success(`文章推荐成功`)
+        } else {
+          this.$message.error(`文章推荐失败`)
+        }
       })
-      this.selectDateVisible = true
     },
     operateTrip () {
       const param = {

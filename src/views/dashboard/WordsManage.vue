@@ -220,10 +220,20 @@ export default {
       this.toModifyWordItem = item
     },
     del (item) {
-      deleteShieldWords(item.shieldId).then(ret => {
-        if (ret && ret.success) {
-          this.$message.success('屏蔽词删除成功')
-          this.$refs.table.refresh(true)
+      this.$confirm({
+        title: '即将删除屏蔽词',
+        content: '是否确认？',
+        okText: '确认',
+        cancelText: '取消',
+        onOk: () => {
+          deleteShieldWords({
+            shieldId: item.shieldId
+          }).then(ret => {
+            if (ret && ret.success) {
+              this.$message.success('屏蔽词删除成功')
+              this.$refs.table.refresh(true)
+            }
+          })
         }
       })
     },

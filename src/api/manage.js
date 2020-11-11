@@ -104,9 +104,10 @@ export function operateUser (params) {
 
 export function operateTrip (params) {
   return request({
+    useJson: true,
     url: '/wandering/trip/v1/operateTrip',
     method: 'post',
-    data: qs.stringify(params)
+    data: params
   })
 }
 
@@ -195,10 +196,11 @@ export function listAllShieldWords () {
   })
 }
 
-export function deleteShieldWords (id) {
+export function deleteShieldWords (param) {
   return request({
-    url: `/wandering/shield/v1/relShieldWords/${id}`,
-    method: 'delete'
+    url: `/wandering/shield/v1/relShieldWords`,
+    method: 'delete',
+    params: param
   })
 }
 
@@ -281,8 +283,9 @@ export function updateExamineStatus (params) {
 
 export function examineChange (params) {
   return request({
+    useJson: true,
     url: `/wandering/examine/v1/examineChange`,
     method: 'post',
-    data: qs.stringify(params)
+    data: params
   })
 }

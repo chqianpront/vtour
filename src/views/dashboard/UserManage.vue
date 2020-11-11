@@ -205,7 +205,8 @@ const columns = [
   },
   {
     title: '绑定时间',
-    dataIndex: 'gmtCreate'
+    dataIndex: 'gmtCreate',
+    sorter: true
   },
   {
     title: '行程发布量',
@@ -214,8 +215,7 @@ const columns = [
   },
   {
     title: '关注数',
-    dataIndex: 'fensNum',
-    sorter: true
+    dataIndex: 'fensNum'
   },
   {
     title: '操作',
@@ -270,7 +270,7 @@ export default {
         requestParameters.currentPage = parameter.pageNo
         requestParameters.pageNum = parameter.pageSize
         requestParameters.seqType = this.getSeqType(parameter.sortField)
-        requestParameters.sequnce = this.getSequnce(parameter.sortOrder)
+        requestParameters.sequence = this.getSequnce(parameter.sortOrder)
         requestParameters.selectContent = this.queryParam.selectContent
         console.log('loadData request parameters:', requestParameters, parameter, this.queryParam)
         return userList(requestParameters)
@@ -337,7 +337,7 @@ export default {
       switch (str) {
         case 'tripNum':
           return 1
-        case 'fensNum':
+        case 'gmtCreate':
           return 2
         default:
           return undefined
@@ -368,26 +368,42 @@ export default {
       })
     },
     deleteUser () {
-      operateUser({
-        openId: this.userDetailInfo.openId,
-        type: 1
-      }).then(ret => {
-        if (ret && ret.success) {
-          this.$refs.table.reload()
-          this.$message.success('删除成功')
-          this.visible = false
+      this.$confirm({
+        title: '即将删除用户',
+        content: '是否确认？',
+        okText: '确认',
+        okType: 'danger',
+        cancelText: '取消',
+        onOk: () => {
+          operateUser({
+            openId: this.userDetailInfo.openId,
+            type: 1
+          }).then(ret => {
+            this.$refs.table.refresh()
+            this.$message.success('删除成功')
+            this.visible = false
+          })
         }
       })
     },
     forbid () {
-      operateUser({
-        openId: this.userDetailInfo.openId,
-        type: 2
-      }).then(ret => {
-        if (ret && ret.success) {
-          this.$refs.table.reload()
-          this.$message.success('禁用成功')
-          this.visible = false
+      this.$confirm({
+        title: '即将禁用用户',
+        content: '是否确认？',
+        okText: '确认',
+        okType: 'danger',
+        cancelText: '取消',
+        onOk: () => {
+          operateUser({
+            openId: this.userDetailInfo.openId,
+            type: 2
+          }).then(ret => {
+            if (ret && ret.success) {
+              this.$refs.table.refresh()
+              this.$message.success('禁用成功')
+              this.visible = false
+            }
+          })
         }
       })
     },

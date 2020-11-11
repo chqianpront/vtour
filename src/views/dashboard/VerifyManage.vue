@@ -320,7 +320,7 @@ export default {
               }))
               return {
                 data: data,
-                pageSize: 20,
+                pageSize: res.value.pageInfo.pageSize,
                 pageNo: res.value.pageInfo.currentPage,
                 totalPage: res.value.pageInfo.totalPage,
                 totalCount: res.value.pageInfo.totalCount
@@ -356,7 +356,7 @@ export default {
               }))
               return {
                 data: data,
-                pageSize: 20,
+                pageSize: res.value.pageInfo.pageSize,
                 pageNo: res.value.pageInfo.currentPage,
                 totalPage: res.value.pageInfo.totalPage,
                 totalCount: res.value.pageInfo.totalCount
@@ -541,10 +541,10 @@ export default {
         content: '对此条信息的审核操作',
         okText: '审核通过',
         cancelText: '审核不通过',
-        onOk () {
+        onOk: () => {
           this.examineChange(id, type, 1)
         },
-        onCancel () {
+        onCancel: () => {
           this.examineChange(id, type, 2)
         }
       })
