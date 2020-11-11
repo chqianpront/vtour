@@ -62,7 +62,21 @@
       <a-tab-pane :key="1" tab="新增人数">
         <a-row>
           <a-col :span="24">
-            <a-range-picker :value="[startTime, endTime]" :ranges="dOptions" format="YYYY-MM-DD" @change="dateChange"/>
+            <a-select :default-value="1" style="width: 120px; margin-right: 14px;" v-model="timeType" :disabled-date="disabledDate" @change="dateChange">
+              <a-select-option :value="1">
+                昨日
+              </a-select-option>
+              <a-select-option :value="2">
+                本周
+              </a-select-option>
+              <a-select-option :value="3">
+                本月
+              </a-select-option>
+              <a-select-option :value="4">
+                动态时间
+              </a-select-option>
+            </a-select>
+            <a-range-picker v-show="timeType === 4" :value="[startTime, endTime]" :ranges="dOptions" format="YYYY-MM-DD" @change="dateChange"/>
           </a-col>
           <a-col :span="24">
             <ve-line :data="vData1"></ve-line>
@@ -72,7 +86,21 @@
       <a-tab-pane :key="2" tab="净增绑定">
         <a-row>
           <a-col :span="24">
-            <a-range-picker :value="[startTime, endTime]" :ranges="dOptions" format="YYYY-MM-DD" @change="dateChange"/>
+            <a-select :default-value="1" style="width: 120px; margin-right: 14px;" v-model="timeType" :disabled-date="disabledDate" @change="dateChange">
+              <a-select-option :value="1">
+                昨日
+              </a-select-option>
+              <a-select-option :value="2">
+                本周
+              </a-select-option>
+              <a-select-option :value="3">
+                本月
+              </a-select-option>
+              <a-select-option :value="4">
+                动态时间
+              </a-select-option>
+            </a-select>
+            <a-range-picker v-show="timeType === 4" :value="[startTime, endTime]" :ranges="dOptions" format="YYYY-MM-DD" @change="dateChange"/>
           </a-col>
           <a-col :span="24">
             <ve-line :data="vData2"></ve-line>
@@ -82,7 +110,21 @@
       <a-tab-pane :key="3" tab="新增作品">
         <a-row>
           <a-col :span="24">
-            <a-range-picker :value="[startTime, endTime]" :ranges="dOptions" format="YYYY-MM-DD" @change="dateChange"/>
+            <a-select :default-value="1" style="width: 120px; margin-right: 14px;" v-model="timeType" :disabled-date="disabledDate" @change="dateChange">
+              <a-select-option :value="1">
+                昨日
+              </a-select-option>
+              <a-select-option :value="2">
+                本周
+              </a-select-option>
+              <a-select-option :value="3">
+                本月
+              </a-select-option>
+              <a-select-option :value="4">
+                动态时间
+              </a-select-option>
+            </a-select>
+            <a-range-picker v-show="timeType === 4" :value="[startTime, endTime]" :ranges="dOptions" format="YYYY-MM-DD" @change="dateChange"/>
           </a-col>
           <a-col :span="24">
             <ve-line :data="vData3"></ve-line>
@@ -92,7 +134,21 @@
       <a-tab-pane :key="4" tab="活跃人数">
         <a-row>
           <a-col :span="24">
-            <a-range-picker :value="[startTime, endTime]" :ranges="dOptions" format="YYYY-MM-DD" @change="dateChange"/>
+            <a-select :default-value="1" style="width: 120px; margin-right: 14px;" v-model="timeType" :disabled-date="disabledDate" @change="dateChange">
+              <a-select-option :value="1">
+                昨日
+              </a-select-option>
+              <a-select-option :value="2">
+                本周
+              </a-select-option>
+              <a-select-option :value="3">
+                本月
+              </a-select-option>
+              <a-select-option :value="4">
+                动态时间
+              </a-select-option>
+            </a-select>
+            <a-range-picker v-show="timeType === 4" :value="[startTime, endTime]" :ranges="dOptions" format="YYYY-MM-DD" @change="dateChange"/>
           </a-col>
           <a-col :span="24">
             <ve-line :data="vData4"></ve-line>
@@ -130,11 +186,7 @@ export default {
       endTime: moment(),
       timeType: 1,
       queryType: 1,
-      dOptions: {
-        '昨日': [moment().subtract(1, 'days'), moment()],
-        '本周': [moment().subtract(7, 'days'), moment()],
-        '本月': [moment().subtract(30, 'days'), moment()]
-      }
+      dOptions: {}
     }
   },
   mounted () {
@@ -142,6 +194,9 @@ export default {
     this.getChartData()
   },
   methods: {
+    disabledDate (current) {
+      return current && current > moment().endOf('day')
+    },
     coreDateChange () {
       console.log('dd')
     },
@@ -162,12 +217,15 @@ export default {
       this.getChartData()
     },
     getChartData () {
-      coreIndicatorsChart({
+      const param = {
         queryType: this.queryType,
-        startTime: moment(this.startTime).valueOf(),
-        endTime: moment(this.endTime).valueOf(),
-        timeType: 4
-      }).then(ret => {
+        timeType: this.timeType
+      }
+      if (this.timeType === 4) {
+        param.startTime = moment(this.startTime).valueOf()
+        param.endTime = moment(this.endTime).valueOf()
+      }
+      coreIndicatorsChart(param).then(ret => {
         if (ret && ret.success) {
           this[`vData${this.queryType}`].rows = ret.value
         }

@@ -49,7 +49,7 @@
         <span slot="action" slot-scope="text, record">
           <template>
             <a @click="tourDetail(record)" style="margin-right: 8px;">行程详情</a>
-            <a @click="deleteRoutine(record)">删除游记</a>
+            <a @click="toDeleteRoutine(record)">删除游记</a>
           </template>
         </span>
       </s-table>
@@ -59,6 +59,15 @@
       <div>
         <img style="display: block; margin: 0 auto; max-width: 800px;" :src="popImgSrc" alt="行程图片">
       </div>
+    </a-modal>
+    <a-modal
+    v-model="deleteRoutineVisible"
+    title="删除理由"
+    okText="删除"
+    cancelText="取消"
+    @ok="deleteRoutine"
+    @cancel="deleteRoutineVisible = false">
+      <a-textarea placeholder="请填写删除理由" :rows="4" v-model="deleteMsg"/>
     </a-modal>
   </page-header-wrapper>
 </template>
@@ -138,6 +147,9 @@ export default {
   data () {
     this.columns = columns
     return {
+      deleteMsg: '',
+      deleteRoutineVisible: false,
+      toDeleteRoutineItem: null,
       popImgSrc: null,
       imgVisible: false,
       // create model
@@ -157,6 +169,7 @@ export default {
       loadData: parameter => {
         const requestParameters = Object.assign({}, parameter, this.queryParam)
         console.log('loadData request parameters:', requestParameters)
+        requestParameters.pageNum = parameter.pageSize
         requestParameters.tripId = this.tripId
         requestParameters.currentPage = parameter.pageNo
         return listTravel(requestParameters)
@@ -171,7 +184,7 @@ export default {
               }))
               return {
                 data: data,
-                pageSize: 20,
+                pageSize: res.value.pageInfo.pageSize,
                 pageNo: res.value.pageInfo.currentPage,
                 totalPage: res.value.pageInfo.totalPage,
                 totalCount: res.value.pageInfo.totalCount
@@ -211,6 +224,11 @@ export default {
     }
   },
   methods: {
+    toDeleteRoutine (item) {
+      this.deleteMsg = ''
+      this.toDeleteRoutineItem = item
+      this.deleteRoutineVisible = true
+    },
     popImg (src) {
       this.popImgSrc = src
       this.imgVisible = true
@@ -231,11 +249,14 @@ export default {
         path: '/article-manage'
       })
     },
-    deleteRoutine (item) {
-      deleteTravel(item.travelId).then(ret => {
+    deleteRoutine () {
+      deleteTravel(this.toDeleteRoutineItem.travelId, {
+        deleteMsg: this.deleteMsg
+      }).then(ret => {
         if (ret) {
           this.$message.success('游记删除成功')
           this.$refs.table.refresh(true)
+          this.deleteRoutineVisible = false
         }
       })
     },

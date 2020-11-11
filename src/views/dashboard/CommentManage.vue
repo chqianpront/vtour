@@ -38,7 +38,7 @@
         <span slot="openId" slot-scope="text">
           <a-tooltip trigger="click">
             <template slot="title">
-              {{text}}
+              {{ text }}
             </template>
             <span style="cursor: pointer;">******</span>
           </a-tooltip>
@@ -47,11 +47,20 @@
         <span slot="action" slot-scope="text, record">
           <template>
             <a @click="commentDetail(record)" style="margin-right: 8px;">行程详情</a>
-            <a @click="deleteComment(record)">删除评论</a>
+            <a @click="toDeleteComment(record)">删除评论</a>
           </template>
         </span>
       </s-table>
     </a-card>
+    <a-modal
+    v-model="deleteCommentVisible"
+    title="删除理由"
+    okText="删除"
+    cancelText="取消"
+    @ok="deleteComment"
+    @cancel="deleteCommentVisible = false">
+      <a-textarea placeholder="请填写删除理由" :rows="4" v-model="deleteMsg"/>
+    </a-modal>
   </page-header-wrapper>
 </template>
 
@@ -127,6 +136,9 @@ export default {
   data () {
     this.columns = columns
     return {
+      deleteMsg: '',
+      deleteCommentVisible: false,
+      toDeleteCommentItem: null,
       // create model
       visible: false,
       confirmLoading: false,
@@ -141,6 +153,7 @@ export default {
       // 加载数据方法 必须为 Promise 对象
       loadData: parameter => {
         const requestParameters = Object.assign({}, parameter, this.queryParam)
+        requestParameters.pageNum = parameter.pageSize
         requestParameters.currentPage = parameter.pageNo
         requestParameters.tripId = this.tripId
         console.log('loadData request parameters:', requestParameters)
@@ -156,7 +169,7 @@ export default {
               }))
               return {
                 data: data,
-                pageSize: 20,
+                pageSize: res.value.pageInfo.pageSize,
                 pageNo: res.value.pageInfo.currentPage,
                 totalPage: res.value.pageInfo.totalPage,
                 totalCount: res.value.pageInfo.totalCount
@@ -196,16 +209,24 @@ export default {
     }
   },
   methods: {
+    toDeleteComment (item) {
+      this.deleteMsg = ''
+      this.toDeleteCommentItem = item
+      this.deleteCommentVisible = true
+    },
     toBack () {
       this.$router.replace({
         path: '/article-manage'
       })
     },
-    deleteComment (item) {
-      deleteComment(item.commentId).then(ret => {
+    deleteComment () {
+      deleteComment(this.toDeleteCommentItem.commentId, {
+        deleteMsg: this.deleteMsg
+      }).then(ret => {
         if (ret && ret.success) {
           this.$message.success('评论删除成功')
           this.$refs.table.refresh(true)
+          this.deleteCommentVisible = false
         }
       })
     },

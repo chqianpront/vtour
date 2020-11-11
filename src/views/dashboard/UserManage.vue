@@ -14,7 +14,7 @@
                 <a-button type="primary" @click="$refs.table.refresh(true)">搜索</a-button>
               </span>
             </a-col>
-            <a-col :md="8" :sm="24">
+            <!-- <a-col :md="8" :sm="24">
               <a-select :default-value="1" style="width: 200px; margin-right: 8px;" @change="handleChange" v-model="seqType">
                 <a-select-option :value="1">
                   发布时间排序
@@ -25,7 +25,7 @@
               </a-select>
               <a-icon @click="sequnceDesc" v-show="this.sequence == 1" type="sort-ascending" />
               <a-icon @click="sequnceAsc" v-show="this.sequence != 1" type="sort-descending" />
-            </a-col>
+            </a-col> -->
           </a-row>
         </a-form>
       </div>
@@ -58,8 +58,8 @@
         <span slot="action" slot-scope="text, record">
           <template>
             <a @click="userDetail(record)" style="margin-right: 8px;">详情</a>
-            <a @click="userDetail(record)" style="margin-right: 8px;">禁止发布行程、游记</a>
-            <a @click="userDetail(record)">禁止评论</a>
+            <!-- <a @click="userDetail(record)" style="margin-right: 8px;">禁止发布行程、游记</a>
+            <a @click="userDetail(record)">禁止评论</a> -->
           </template>
         </span>
       </s-table>
@@ -209,11 +209,13 @@ const columns = [
   },
   {
     title: '行程发布量',
-    dataIndex: 'tripNum'
+    dataIndex: 'tripNum',
+    sorter: true
   },
   {
     title: '关注数',
-    dataIndex: 'fensNum'
+    dataIndex: 'fensNum',
+    sorter: true
   },
   {
     title: '操作',
@@ -267,8 +269,8 @@ export default {
         const requestParameters = Object.assign({}, parameter, this.queryParam)
         requestParameters.currentPage = parameter.pageNo
         requestParameters.pageNum = parameter.pageSize
-        requestParameters.seqType = this.seqType
-        requestParameters.sequnce = this.sequnce
+        requestParameters.seqType = this.getSeqType(parameter.sortField)
+        requestParameters.sequnce = this.getSequnce(parameter.sortOrder)
         requestParameters.selectContent = this.queryParam.selectContent
         console.log('loadData request parameters:', requestParameters, parameter, this.queryParam)
         return userList(requestParameters)
@@ -283,7 +285,7 @@ export default {
               }))
               return {
                 data: data,
-                pageSize: 20,
+                pageSize: res.value.pageInfo.pageSize,
                 pageNo: res.value.pageInfo.currentPage,
                 totalPage: res.value.pageInfo.totalPage,
                 totalCount: res.value.pageInfo.totalCount
@@ -321,6 +323,26 @@ export default {
     }
   },
   methods: {
+    getSequnce (str) {
+      switch (str) {
+        case 'ascend':
+          return 1
+        case 'descend':
+          return 2
+        default:
+          return undefined
+      }
+    },
+    getSeqType (str) {
+      switch (str) {
+        case 'tripNum':
+          return 1
+        case 'fensNum':
+          return 2
+        default:
+          return undefined
+      }
+    },
     sequnceDesc () {
       this.sequence = 2
       this.$refs.table.refresh(true)
@@ -350,8 +372,10 @@ export default {
         openId: this.userDetailInfo.openId,
         type: 1
       }).then(ret => {
-        if (ret) {
+        if (ret && ret.success) {
           this.$refs.table.reload()
+          this.$message.success('删除成功')
+          this.visible = false
         }
       })
     },
@@ -360,8 +384,10 @@ export default {
         openId: this.userDetailInfo.openId,
         type: 2
       }).then(ret => {
-        if (ret) {
+        if (ret && ret.success) {
           this.$refs.table.reload()
+          this.$message.success('禁用成功')
+          this.visible = false
         }
       })
     },

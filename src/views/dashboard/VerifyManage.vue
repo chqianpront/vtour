@@ -20,7 +20,7 @@
                       <a-button type="primary" @click="$refs.routineTable.refresh(true)">搜索</a-button>
                     </span>
                   </a-col>
-                  <a-col :md="8" :sm="24">
+                  <!-- <a-col :md="8" :sm="24">
                     <a-select :default-value="1" style="width: 200px; margin-right: 8px;" @change="routineTypeChange" v-model="routineType">
                       <a-select-option :value="1">
                         发布时间排序
@@ -31,7 +31,7 @@
                     </a-select>
                     <a-icon @click="sequnceDesc" v-show="this.sequence == 1" type="sort-ascending" />
                     <a-icon @click="sequnceAsc" v-show="this.sequence != 1" type="sort-descending" />
-                  </a-col>
+                  </a-col> -->
                 </a-row>
               </a-form>
             </div>
@@ -395,7 +395,7 @@ export default {
               }))
               return {
                 data: data,
-                pageSize: 20,
+                pageSize: res.value.pageInfo.pageSize,
                 pageNo: res.value.pageInfo.currentPage,
                 totalPage: res.value.pageInfo.totalPage,
                 totalCount: res.value.pageInfo.totalCount

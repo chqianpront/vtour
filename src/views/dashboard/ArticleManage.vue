@@ -14,7 +14,7 @@
                 <a-button type="primary" @click="$refs.table.refresh(true)">搜索</a-button>
               </span>
             </a-col>
-            <a-col :md="8" :sm="24">
+            <!-- <a-col :md="8" :sm="24">
               <a-select :default-value="1" style="width: 200px; margin-right: 8px;" @change="handleChange" v-model="seqType">
                 <a-select-option :value="1">
                   发布时间排序
@@ -37,7 +37,7 @@
               </a-select>
               <a-icon @click="sequnceDesc" v-show="this.sequence == 1" type="sort-ascending" />
               <a-icon @click="sequnceAsc" v-show="this.sequence != 1" type="sort-descending" />
-            </a-col>
+            </a-col> -->
           </a-row>
         </a-form>
       </div>
@@ -62,7 +62,7 @@
         <span slot="openId" slot-scope="text">
           <a-tooltip trigger="click">
             <template slot="title">
-              {{text}}
+              {{ text }}
             </template>
             <span style="cursor: pointer;">******</span>
           </a-tooltip>
@@ -104,19 +104,36 @@
               <template slot="title">
                 删除行程
               </template>
-              <a @click="getToTop(record)" style="margin-right: 8px; color: red">删</a>
+              <a @click="toDeleteRoutine(record)" style="margin-right: 8px; color: red">删</a>
             </a-tooltip>
           </template>
         </span>
       </s-table>
     </a-card>
+    <a-modal
+      v-model="selectDateVisible"
+      title="选择时间段"
+      @ok="operateTrip"
+      okText="确定"
+      cancelText="取消">
+      <a-range-picker v-model="dateRange" showTime format="YYYY-MM-DD HH:mm:ss"/>
+    </a-modal>
+    <a-modal
+      v-model="deleteRoutineVisible"
+      title="删除理由"
+      okText="删除"
+      cancelText="取消"
+      @ok="deleteRoutine"
+      @cancel="deleteRoutineVisible = false">
+      <a-textarea placeholder="请填写删除理由" :rows="4" v-model="deleteMsg"/>
+    </a-modal>
   </page-header-wrapper>
 </template>
 
 <script>
 import moment from 'moment'
 import { STable, Ellipsis } from '@/components'
-import { tripList, operateTrip } from '@/api/manage'
+import { tripList, operateTrip, deleteTrips } from '@/api/manage'
 
 const columns = [
   {
@@ -144,7 +161,8 @@ const columns = [
   },
   {
     title: '点赞数',
-    dataIndex: 'praiseNum'
+    dataIndex: 'praiseNum',
+    sorter: true
   },
   {
     title: '评论数',
@@ -160,7 +178,8 @@ const columns = [
   },
   {
     title: '行程创建时间',
-    dataIndex: 'tripCreateTime'
+    dataIndex: 'tripCreateTime',
+    sorter: true
   },
   {
     title: '操作',
@@ -198,6 +217,12 @@ export default {
   data () {
     this.columns = columns
     return {
+      deleteMsg: '',
+      deleteRoutineVisible: false,
+      toDeleteRoutineItem: null,
+      selectDateVisible: false,
+      dateRange: [moment(), moment()],
+      aItem: null,
       // create model
       visible: false,
       confirmLoading: false,
@@ -213,8 +238,8 @@ export default {
         const requestParameters = Object.assign({}, parameter, this.queryParam)
         requestParameters.currentPage = parameter.pageNo
         requestParameters.pageNum = parameter.pageSize
-        requestParameters.seqType = this.seqType
-        requestParameters.sequence = this.sequence
+        requestParameters.seqType = this.getSeqType(parameter.sortField)
+        requestParameters.sequnce = this.getSequnce(parameter.sortOrder)
         console.log('loadData request parameters:', requestParameters)
         return tripList(requestParameters)
           .then(res => {
@@ -229,7 +254,7 @@ export default {
               }))
               return {
                 data: data,
-                pageSize: 20,
+                pageSize: res.value.pageInfo.pageSize,
                 pageNo: res.value.pageInfo.currentPage,
                 totalPage: res.value.pageInfo.totalPage,
                 totalCount: res.value.pageInfo.totalCount
@@ -266,6 +291,43 @@ export default {
     }
   },
   methods: {
+    toDeleteRoutine (item) {
+      this.deleteMsg = ''
+      this.toDeleteRoutineItem = item
+      this.deleteRoutineVisible = true
+    },
+    deleteRoutine () {
+      deleteTrips({
+        id: this.toDeleteRoutineItem.tripId,
+        deleteMsg: this.deleteMsg
+      }).then(ret => {
+        if (ret) {
+          this.$message.success('游记删除成功')
+          this.$refs.table.refresh(true)
+          this.deleteRoutineVisible = false
+        }
+      })
+    },
+    getSequnce (str) {
+      switch (str) {
+        case 'ascend':
+          return 1
+        case 'descend':
+          return 2
+        default:
+          return undefined
+      }
+    },
+    getSeqType (str) {
+      switch (str) {
+        case 'tripCreateTime':
+          return 1
+        case 'praiseNum':
+          return 2
+        default:
+          return undefined
+      }
+    },
     sequnceDesc () {
       this.sequence = 2
       this.$refs.table.refresh(true)
@@ -278,25 +340,31 @@ export default {
       this.$refs.table.refresh(true)
     },
     getToTop (item) {
-      operateTrip({
-        topEnd: 0,
-        topStart: 0,
-        tripId: item.tripId,
-        type: 1
-      }).then(ret => {
-        console.log(ret)
-        this.$message.success('文章置顶成功')
+      this.aItem = Object.assign({}, item, {
+        type: 2
       })
+      this.selectDateVisible = true
     },
     recommend (item) {
-      operateTrip({
-        topEnd: 0,
-        topStart: 0,
-        tripId: item.tripId,
-        type: 0
-      }).then(ret => {
-        console.log(ret)
-        this.$message.success('文章推荐成功')
+      this.aItem = Object.assign({}, item, {
+        type: 1
+      })
+      this.selectDateVisible = true
+    },
+    operateTrip () {
+      const param = {
+        topEnd: moment(this.dateRange[0]).valueOf(),
+        topStart: moment(this.dateRange[1]).valueOf(),
+        tripId: this.aItem.tripId,
+        type: this.aItem.type
+      }
+      operateTrip(param).then(ret => {
+        if (ret && ret.success) {
+          this.$message.success(`文章${this.aItem.type === 1 ? '推荐' : '置顶'}成功`)
+        } else {
+          this.$message.error(`文章${this.aItem.type === 1 ? '推荐' : '置顶'}失败`)
+        }
+        this.selectDateVisible = false
       })
     },
     tourDetail (item) {

@@ -133,17 +133,19 @@ export function commentList (params) {
   })
 }
 
-export function deleteComment (id) {
+export function deleteComment (id, param) {
   return request({
     url: `/wandering/comment/v1/commentInfo/${id}`,
-    method: 'delete'
+    method: 'delete',
+    params: param
   })
 }
 
-export function deleteTravel (id) {
+export function deleteTravel (id, param) {
   return request({
     url: `/wandering/travel/v1/travelNotes/${id}`,
-    method: 'delete'
+    method: 'delete',
+    params: param
   })
 }
 
