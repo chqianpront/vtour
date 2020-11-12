@@ -6,7 +6,7 @@
     </span>
     <template v-slot:overlay>
       <a-menu class="ant-pro-drop-down menu" :selected-keys="[]">
-        <a-menu-item v-if="menu" key="center" @click="handleToCenter">
+        <!-- <a-menu-item v-if="menu" key="center" @click="handleToCenter">
           <a-icon type="user" />
           个人中心
         </a-menu-item>
@@ -14,7 +14,7 @@
           <a-icon type="setting" />
           个人设置
         </a-menu-item>
-        <a-menu-divider v-if="menu" />
+        <a-menu-divider v-if="menu" /> -->
         <a-menu-item key="logout" @click="handleLogout">
           <a-icon type="logout" />
           退出登录
@@ -51,8 +51,8 @@ export default {
     },
     handleLogout (e) {
       Modal.confirm({
-        title: this.$t('layouts.usermenu.dialog.title'),
-        content: this.$t('layouts.usermenu.dialog.content'),
+        title: '即将退出登录',
+        content: '是否确认？',
         onOk: () => {
           // return new Promise((resolve, reject) => {
           //   setTimeout(Math.random() > 0.5 ? resolve : reject, 1500)

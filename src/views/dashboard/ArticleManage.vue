@@ -92,13 +92,13 @@
               <template slot="title">
                 推荐
               </template>
-              <a @click="recommend(record)" style="margin-right: 8px">推</a>
+              <a @click="recommend(record)" :style="{ 'margin-right': '8px', color: record.isRecommend ? '#f44336' : '#1890ff' }">推</a>
             </a-tooltip>
             <a-tooltip>
               <template slot="title">
                 置顶
               </template>
-              <a @click="getToTop(record)" style="margin-right: 8px">顶</a>
+              <a @click="getToTop(record)" :style="{ 'margin-right': '8px', color: record.isTop ? '#f44336' : '#1890ff' }">顶</a>
             </a-tooltip>
             <a-tooltip>
               <template slot="title">

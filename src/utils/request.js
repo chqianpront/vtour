@@ -49,7 +49,7 @@ request.interceptors.request.use(config => {
   if (token) {
     config.headers['Access-Token'] = token
   }
-  if (config.useJson) {
+  if (config.headers['Content-Type'] === 'application/json') {
     config.headers['Content-Type'] = 'application/json'
   } else {
     config.headers['Content-Type'] = 'application/x-www-form-urlencoded'

@@ -438,7 +438,6 @@ export default {
         const replaceStr = `<span style="color: red;">${itm.shieldWords}</span>`
         tText = tText.replace(reg, replaceStr)
       })
-      console.log(text, tText, this.shieldWords)
       return tText
     },
     listAllShieldWords () {
@@ -480,8 +479,8 @@ export default {
       this.$refs.routineTable.refresh(true)
     },
     callback (index) {
-      this.curIndex = index
-      switch (index) {
+      this.curIndex = parseInt(index)
+      switch (this.curIndex) {
         case 1:
           this.$refs.routineTable.refresh(true)
           break

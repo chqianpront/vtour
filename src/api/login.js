@@ -2,7 +2,7 @@ import request from '@/utils/request'
 import qs from 'querystring'
 const userApi = {
   Login: '/wandering/login',
-  Logout: '/auth/logout',
+  Logout: '/wandering/loginOut',
   ForgePassword: '/auth/forge-password',
   Register: '/auth/register',
   twoStepCode: '/auth/2step-code',
@@ -60,10 +60,7 @@ export function getCurrentUserNav () {
 export function logout () {
   return request({
     url: userApi.Logout,
-    method: 'post',
-    headers: {
-      'Content-Type': 'application/json;charset=UTF-8'
-    }
+    method: 'post'
   })
 }
 
