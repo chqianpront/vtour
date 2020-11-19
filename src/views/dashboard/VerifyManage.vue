@@ -45,7 +45,7 @@
             >
               <span slot="routinePic" slot-scope="text, record">
                 <template v-for="(pic, picIndex) in record.materialUrls">
-                  <img v-if="!isVideo(pic)" :key="picIndex" :src="pic" style="width: 40px; margin-right: 8px; margin-top: 4px;" alt="游记图片">
+                  <img v-if="!isVideo(pic)" @click="popImg(pic)" :key="picIndex" :src="pic" style="width: 40px; margin-right: 8px; margin-top: 4px; cursor: pointer" alt="游记图片">
                   <video v-if="isVideo(pic)" :key="picIndex" :src="pic" controls style="width: 200px; margin-right: 8px; margin-top: 4px;"></video>
                 </template>
               </span>
@@ -172,6 +172,11 @@
         </a-tab-pane>
       </a-tabs>
     </a-card>
+    <a-modal v-model="imgVisible" title="图片" cancel-text="取消" ok-text="确认" width="900px">
+      <div>
+        <img style="display: block; margin: 0 auto; max-width: 800px" :src="popImgSrc" alt="图片" />
+      </div>
+    </a-modal>
   </page-header-wrapper>
 </template>
 
@@ -296,6 +301,8 @@ export default {
     this.tourColumns = tourColumns
     this.routineColumns = routineColumns
     return {
+      popImgSrc: null,
+      imgVisible: false,
       curIndex: 1,
       isVerifyOpened: false,
       advanced: false,
@@ -428,6 +435,10 @@ export default {
     this.getVerifyStatus()
   },
   methods: {
+    popImg (src) {
+      this.popImgSrc = src
+      this.imgVisible = true
+    },
     highl: function (text) {
       if (!text || !this.shieldWords) {
         return text

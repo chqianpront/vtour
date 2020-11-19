@@ -1,7 +1,6 @@
 <template>
   <page-header-wrapper>
     <a-card :bordered="false">
-
       <a-tabs default-active-key="1" @change="callback">
         <a-tab-pane key="1" tab="评论">
           <a-card :bordered="false">
@@ -10,22 +9,26 @@
                 <a-row :gutter="48">
                   <a-col :md="8" :sm="24">
                     <a-form-item label="">
-                      <a-input v-model="commentQuery.selectContent" placeholder="请输入昵称/openid"/>
+                      <a-input v-model="commentQuery.selectContent" placeholder="请输入昵称/openid" />
                     </a-form-item>
                   </a-col>
-                  <a-col :md="!advanced && 8 || 24" :sm="24">
-                    <span class="table-page-search-submitButtons" :style="advanced && { float: 'right', overflow: 'hidden' } || {} ">
+                  <a-col :md="(!advanced && 8) || 24" :sm="24">
+                    <span
+                      class="table-page-search-submitButtons"
+                      :style="(advanced && { float: 'right', overflow: 'hidden' }) || {}"
+                    >
                       <a-button type="primary" @click="$refs.commentTable.refresh(true)">搜索</a-button>
                     </span>
                   </a-col>
                   <a-col :md="8" :sm="24">
-                    <a-select :default-value="1" style="width: 200px; margin-right: 8px;" @change="commentTypeChange" v-model="commentType">
-                      <a-select-option :value="1">
-                        审核不通过的垃圾
-                      </a-select-option>
-                      <a-select-option :value="0">
-                        删除的垃圾
-                      </a-select-option>
+                    <a-select
+                      :default-value="1"
+                      style="width: 200px; margin-right: 8px"
+                      @change="commentTypeChange"
+                      v-model="commentType"
+                    >
+                      <a-select-option :value="1"> 审核不通过的垃圾 </a-select-option>
+                      <a-select-option :value="0"> 删除的垃圾 </a-select-option>
                     </a-select>
                   </a-col>
                 </a-row>
@@ -48,22 +51,26 @@
                 <a-row :gutter="48">
                   <a-col :md="8" :sm="24">
                     <a-form-item label="">
-                      <a-input v-model="tourQuery.selectContent" placeholder="请输入昵称/openid"/>
+                      <a-input v-model="tourQuery.selectContent" placeholder="请输入昵称/openid" />
                     </a-form-item>
                   </a-col>
-                  <a-col :md="!advanced && 8 || 24" :sm="24">
-                    <span class="table-page-search-submitButtons" :style="advanced && { float: 'right', overflow: 'hidden' } || {} ">
+                  <a-col :md="(!advanced && 8) || 24" :sm="24">
+                    <span
+                      class="table-page-search-submitButtons"
+                      :style="(advanced && { float: 'right', overflow: 'hidden' }) || {}"
+                    >
                       <a-button type="primary" @click="$refs.tourTable.refresh(true)">搜索</a-button>
                     </span>
                   </a-col>
                   <a-col :md="8" :sm="24">
-                    <a-select :default-value="1" style="width: 200px; margin-right: 8px;" @change="tourTypeChange" v-model="tourType">
-                      <a-select-option :value="1">
-                        审核不通过的垃圾
-                      </a-select-option>
-                      <a-select-option :value="0">
-                        删除的垃圾
-                      </a-select-option>
+                    <a-select
+                      :default-value="1"
+                      style="width: 200px; margin-right: 8px"
+                      @change="tourTypeChange"
+                      v-model="tourType"
+                    >
+                      <a-select-option :value="1"> 审核不通过的垃圾 </a-select-option>
+                      <a-select-option :value="0"> 删除的垃圾 </a-select-option>
                     </a-select>
                   </a-col>
                 </a-row>
@@ -77,11 +84,23 @@
               :data="loadTourData"
               showPagination="auto"
             >
-
               <span slot="routinePic" slot-scope="text, record">
                 <template v-for="(pic, picIndex) in record.materialUrls">
-                  <img v-if="!isVideo(pic)" :key="picIndex" :src="pic" style="width: 40px; margin-right: 8px; margin-top: 4px;" alt="游记图片">
-                  <video v-if="isVideo(pic)" :key="picIndex" :src="pic" controls style="width: 200px; margin-right: 8px; margin-top: 4px;"></video>
+                  <img
+                    v-if="!isVideo(pic)"
+                    @click="popImg(pic)"
+                    :key="picIndex"
+                    :src="pic"
+                    style="width: 40px; margin-right: 8px; margin-top: 4px; cursor: pointer"
+                    alt="游记图片"
+                  />
+                  <video
+                    v-if="isVideo(pic)"
+                    :key="picIndex"
+                    :src="pic"
+                    controls
+                    style="width: 200px; margin-right: 8px; margin-top: 4px"
+                  ></video>
                 </template>
               </span>
             </s-table>
@@ -94,22 +113,26 @@
                 <a-row :gutter="48">
                   <a-col :md="8" :sm="24">
                     <a-form-item label="">
-                      <a-input v-model="routineQuery.selectContent" placeholder="请输入昵称/openid"/>
+                      <a-input v-model="routineQuery.selectContent" placeholder="请输入昵称/openid" />
                     </a-form-item>
                   </a-col>
-                  <a-col :md="!advanced && 8 || 24" :sm="24">
-                    <span class="table-page-search-submitButtons" :style="advanced && { float: 'right', overflow: 'hidden' } || {} ">
+                  <a-col :md="(!advanced && 8) || 24" :sm="24">
+                    <span
+                      class="table-page-search-submitButtons"
+                      :style="(advanced && { float: 'right', overflow: 'hidden' }) || {}"
+                    >
                       <a-button type="primary" @click="$refs.routineTable.refresh(true)">搜索</a-button>
                     </span>
                   </a-col>
                   <a-col :md="8" :sm="24">
-                    <a-select :default-value="1" style="width: 200px; margin-right: 8px;" @change="routineTypeChange" v-model="routineType">
-                      <a-select-option :value="1">
-                        审核不通过的垃圾
-                      </a-select-option>
-                      <a-select-option :value="0">
-                        删除的垃圾
-                      </a-select-option>
+                    <a-select
+                      :default-value="1"
+                      style="width: 200px; margin-right: 8px"
+                      @change="routineTypeChange"
+                      v-model="routineType"
+                    >
+                      <a-select-option :value="1"> 审核不通过的垃圾 </a-select-option>
+                      <a-select-option :value="0"> 删除的垃圾 </a-select-option>
                     </a-select>
                     <a-icon @click="sequnceDesc" v-show="this.sequence == 1" type="sort-ascending" />
                     <a-icon @click="sequnceAsc" v-show="this.sequence != 1" type="sort-descending" />
@@ -127,8 +150,21 @@
             >
               <span slot="routinePic" slot-scope="text, record">
                 <template v-for="(pic, picIndex) in record.materialUrls">
-                  <img v-if="!isVideo(pic)" :key="picIndex" :src="pic" style="width: 40px; margin-right: 8px; margin-top: 4px;" alt="游记图片">
-                  <video v-if="isVideo(pic)" :key="picIndex" :src="pic" controls style="width: 200px; margin-right: 8px; margin-top: 4px;"></video>
+                  <img
+                    v-if="!isVideo(pic)"
+                    @click="popImg(pic)"
+                    :key="picIndex"
+                    :src="pic"
+                    style="width: 40px; margin-right: 8px; margin-top: 4px; cursor: pointer"
+                    alt="游记图片"
+                  />
+                  <video
+                    v-if="isVideo(pic)"
+                    :key="picIndex"
+                    :src="pic"
+                    controls
+                    style="width: 200px; margin-right: 8px; margin-top: 4px"
+                  ></video>
                 </template>
               </span>
             </s-table>
@@ -136,6 +172,11 @@
         </a-tab-pane>
       </a-tabs>
     </a-card>
+    <a-modal v-model="imgVisible" title="行程图片" cancel-text="取消" ok-text="确认" width="900px">
+      <div>
+        <img style="display: block; margin: 0 auto; max-width: 800px" :src="popImgSrc" alt="行程图片" />
+      </div>
+    </a-modal>
   </page-header-wrapper>
 </template>
 
@@ -246,6 +287,8 @@ export default {
     this.tourColumns = tourColumns
     this.routineColumns = routineColumns
     return {
+      popImgSrc: null,
+      imgVisible: false,
       advanced: false,
       seqType: 1,
       commentType: 1,
@@ -372,6 +415,10 @@ export default {
     }
   },
   methods: {
+    popImg (src) {
+      this.popImgSrc = src
+      this.imgVisible = true
+    },
     isVideo (item) {
       try {
         const videoSuff = ['mp4', 'flv', 'wmv', 'asf', 'rmvb', 'mov', '3gp', 'tm', 'asx']

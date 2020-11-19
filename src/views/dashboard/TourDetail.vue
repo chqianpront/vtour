@@ -14,7 +14,7 @@
         </p>
         <p>
           <span>昵称：</span>
-          <span>{{ tripDetail.nickName }}</span>
+          <span v-html="highl(tripDetail.nickName)"></span>
         </p>
         <p>
           <span>手机号：</span>
@@ -33,7 +33,7 @@
       <a-card style="width: 100%; margin-bottom: 20px;">
         <p style="color: #999">
           <span>行程主题：</span>
-          <span>{{ tripDetail.theme }}</span>
+          <span v-html="highl(tripDetail.theme)"></span>
         </p>
         <p style="color: #999">
           <span>发布时间：</span>
@@ -42,7 +42,14 @@
         <p style="margin-left: 40px">
           <span>行程计划：</span>
           <a-steps v-for="(tourItem, tourIndex) in tripDetail.tripAgendas" progress-dot :key="tourIndex" :current="tripDetail.tripAgendas.length - 1" direction="vertical">
-            <a-step v-for="(agendaItem, agendaIndex) in tourItem.agendaDetails" :key="agendaIndex" :title="agendaItem.city" :description="'-' + agendaItem.plan + ' \t' + agendaItem.location" />
+            <a-step v-for="(agendaItem, agendaIndex) in tourItem.agendaDetails" :key="agendaIndex">
+              <slot name="title">
+                <span v-html="highl(agendaItem.city)"></span>
+              </slot>
+              <slot name="description">
+                <span v-html="highl('-' + agendaItem.plan + ' \t' + agendaItem.location)"></span>
+              </slot>
+            </a-step>
           </a-steps>
         </p>
         <p>
@@ -63,15 +70,19 @@
 </style>
 <script>
 import moment from 'moment'
-import { tripDetail, deleteTrips } from '@/api/manage'
+import { tripDetail, deleteTrips, listAllShieldWords } from '@/api/manage'
 export default {
   data () {
     return {
       id: null,
       tripDetail: {},
       visible: false,
-      deleteReason: ''
+      deleteReason: '',
+      shieldWords: []
     }
+  },
+  created () {
+    this.listAllShieldWords()
   },
   mounted () {
     this.id = this.$route.query.id
@@ -83,6 +94,30 @@ export default {
     })
   },
   methods: {
+    highl: function (text) {
+      if (!text || !this.shieldWords) {
+        return text
+      }
+      let tText = text
+      this.shieldWords.forEach(itm => {
+        const reg = new RegExp(itm.shieldWords, 'g')
+        const replaceStr = `<span style="color: red;">${itm.shieldWords}</span>`
+        tText = tText.replace(reg, replaceStr)
+      })
+      return tText
+    },
+    listAllShieldWords () {
+      listAllShieldWords().then(ret => {
+        if (ret && ret.success) {
+          const tSet = new Set()
+          for (let index = 0; index < ret.value.length; index++) {
+            const element = ret.value[index]
+            tSet.add(element)
+          }
+          this.shieldWords = [...tSet]
+        }
+      })
+    },
     toBack () {
       this.$router.go(-1)
     },
