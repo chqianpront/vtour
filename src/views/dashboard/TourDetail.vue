@@ -43,12 +43,12 @@
           <span>行程计划：</span>
           <a-steps v-for="(tourItem, tourIndex) in tripDetail.tripAgendas" progress-dot :key="tourIndex" :current="tripDetail.tripAgendas.length - 1" direction="vertical">
             <a-step v-for="(agendaItem, agendaIndex) in tourItem.agendaDetails" :key="agendaIndex">
-              <slot name="title">
+              <template slot="title">
                 <span v-html="highl(agendaItem.city)"></span>
-              </slot>
-              <slot name="description">
+              </template>
+              <template slot="description">
                 <span v-html="highl('-' + agendaItem.plan + ' \t' + agendaItem.location)"></span>
-              </slot>
+              </template>
             </a-step>
           </a-steps>
         </p>
